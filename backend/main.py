@@ -10,7 +10,7 @@ app = FastAPI()
 db = database(DB_TOKEN)
 
 
-db.create_db()
+#db.create_db()
 
 
 @app.get("/auth")
@@ -24,8 +24,8 @@ async def auth(username: str, password: str, response: Response, request: Reques
             auth_key = AuthKey(username=user.username, ip=request.client.host,
                                num=db.session.execute(Sequence("authkeys_num_seq")))
             print(auth_key)
-            response.set_cookie(key="auth_key", value=auth_key.content)
-            response.set_cookie(key="username", value=f"{username}")
+            response.set_cookie(key="auth_key", value=auth_key.content, max_age=604800)
+            response.set_cookie(key="username", value=f"{username}", max_age=604800)
             db.session.add(auth_key)
             db.session.commit()
             return "Successful"
@@ -35,8 +35,8 @@ async def auth(username: str, password: str, response: Response, request: Reques
         if admin.password_hash == md5(password.encode()).hexdigest():
             auth_key = AuthKey(username=admin.username, ip=request.client.host,
                                num=db.session.execute(Sequence("authkeys_num_seq")))
-            response.set_cookie(key="auth_key", value=auth_key.content)
-            response.set_cookie(key="username", value=f"{username}")
+            response.set_cookie(key="auth_key", value=auth_key.content, max_age=604800)
+            response.set_cookie(key="username", value=f"{username}", max_age=604800)
             db.session.add(auth_key)
             db.session.commit()
             return "Successful"
@@ -70,9 +70,48 @@ async def register(username: str, password: str, name: str, surname: str, birthd
                         birthday=birthday, city=city))
     db.session.commit()
     auth_key = AuthKey(username=username, ip=request.client.host, num=db.session.scalar(Sequence("authkeys_num_seq")))
-    response.set_cookie(key="auth_key", value=auth_key.content)
-    response.set_cookie(key="username", value=f"{username}")
+    response.set_cookie(key="auth_key", value=auth_key.content, max_age=604800)
+    response.set_cookie(key="username", value=f"{username}", max_age=604800)
     db.session.add(auth_key)
+    db.session.commit()
+    return "Successful"
+
+
+@app.get("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="auth_key")
+    response.delete_cookie(key="username")
+    return "Successful"
+
+
+@app.get("/profile")
+async def profile(auth_key: str | None = Cookie(default=None),
+                  username: str | None = Cookie(default=None)):
+    user = await permissions(auth_key, username)
+    if type(user) is str:
+        return user
+    user = db.session.get(User, user[0])
+    return {"username": user.username, "name": user.name, "surname": user.surname, "patronymic": user.patronymic,
+            "city": user.city, "coins": user.coins, "birthday": user.birthday}
+
+@app.get("/change-my-profile")
+async def change_my_profile(name: str | None = None, surname: str | None = None, patronymic: str | None = None,
+                            city: str | None = None, birthday: str | None = None,
+                            auth_key: str | None = Cookie(default=None), username: str | None = Cookie(default=None)):
+    user = await permissions(auth_key, username)
+    if type(user) is str:
+        return user
+    user = db.session.get(User, user[0])
+    if name is not None:
+        user.name = name
+    if surname is not None:
+        user.surname = surname
+    if patronymic is not None:
+        user.patronymic = patronymic
+    if city is not None:
+        user.city = city
+    if birthday is not None:
+        user.birthday = birthday
     db.session.commit()
     return "Successful"
 
