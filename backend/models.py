@@ -29,23 +29,23 @@ class Company(Base):
 class User(Base):
     __tablename__ = "users"
     # Login data
-    username: Mapped[str] = mapped_column(String(16), primary_key=True)    # Уникальное имя
-    password_hash: Mapped[str] = mapped_column(String(32))    # Хэш пароля
+    username: Mapped[str] = mapped_column(String(16), primary_key=True)  # Уникальное имя
+    password_hash: Mapped[str] = mapped_column(String(32))  # Хэш пароля
 
     # Information
-    name: Mapped[str] = mapped_column(String(16))    # Имя
-    surname: Mapped[str] = mapped_column(String(20))    # Фамилия
-    patronymic: Mapped[str] = mapped_column(String(24))    # Отчество
-    birthday: Mapped[str] = mapped_column(Date())    # Дата рождения
-    city: Mapped[str] = mapped_column(String(20))    # Город
+    name: Mapped[str] = mapped_column(String(16))  # Имя
+    surname: Mapped[str] = mapped_column(String(20))  # Фамилия
+    patronymic: Mapped[str] = mapped_column(String(24))  # Отчество
+    birthday: Mapped[str] = mapped_column(Date())  # Дата рождения
+    city: Mapped[str] = mapped_column(String(20))  # Город
 
     # Reward
-    coins: Mapped[int] = mapped_column(Integer(), default=0)    # Монеты
-    achievements: Mapped[str] = mapped_column(String(), default="")    # Достижения
+    coins: Mapped[int] = mapped_column(Integer(), default=0)  # Монеты
+    achievements: Mapped[str] = mapped_column(String(), default="")  # Достижения
 
     # Preview
     def __repr__(self) -> str:
-        return (f"User(username={self.username!r}, name={self.surname+' '+self.name+' '+self.patronymic!r}, "
+        return (f"User(username={self.username!r}, name={self.surname + ' ' + self.name + ' ' + self.patronymic!r}, "
                 f"birthday={self.birthday!r}, city={self.city!r}, coins={self.coins!r}, "
                 f"achievements={self.achievements!r})")
 
@@ -53,29 +53,29 @@ class User(Base):
 class Admin(Base):
     __tablename__ = "admins"
     # Login data
-    username: Mapped[str] = mapped_column(String(16), primary_key=True)    # Уникальное имя
-    password_hash: Mapped[str] = mapped_column(String(32))    # Хэш пароля
+    username: Mapped[str] = mapped_column(String(16), primary_key=True)  # Уникальное имя
+    password_hash: Mapped[str] = mapped_column(String(32))  # Хэш пароля
 
     # Information
-    name: Mapped[str] = mapped_column(String(16))    # Имя
-    surname: Mapped[str] = mapped_column(String(20))    # Фамилия
-    access_level: Mapped[int] = mapped_column()    # Уровень доступа
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))    # Название компании
+    name: Mapped[str] = mapped_column(String(16))  # Имя
+    surname: Mapped[str] = mapped_column(String(20))  # Фамилия
+    access_level: Mapped[int] = mapped_column()  # Уровень доступа
+    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
 
     # Preview
     def __repr__(self) -> str:
-        return (f"User(username={self.username!r}, name={self.surname+' '+self.name!r}, "
+        return (f"User(username={self.username!r}, name={self.surname + ' ' + self.name!r}, "
                 f"access_level={self.access_level!r})")
 
 
 class Achievement(Base):
     __tablename__ = "achievements"
     # ID
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)    # Идентификатор
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
     # Information
-    title: Mapped[str] = mapped_column(String(32))    # Название
-    description: Mapped[str] = mapped_column(String(256))    # Описание
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))    # Название компании
+    title: Mapped[str] = mapped_column(String(32))  # Название
+    description: Mapped[str] = mapped_column(String(256))  # Описание
+    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
 
     # Preview
     def __repr__(self) -> str:
@@ -86,31 +86,31 @@ class Achievement(Base):
 class Event(Base):
     __tablename__ = "events"
     # ID
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)    # Идентификатор
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
     # Information
-    title: Mapped[str] = mapped_column(String(32))    # Название
-    description: Mapped[str] = mapped_column(String(256))    # Описание
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))    # Название компании
-    address: Mapped[str] = mapped_column(String(64))    # Место проведения
+    title: Mapped[str] = mapped_column(String(32))  # Название
+    description: Mapped[str] = mapped_column(String(256))  # Описание
+    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
+    address: Mapped[str] = mapped_column(String(64))  # Место проведения
     datetime: Mapped[datetime] = mapped_column(DateTime())  # Дата и время проведения
 
     # Preview
     def __repr__(self) -> str:
         return (f"Event(id={self.id!r}, title={self.title!r}, description={self.description!r}, "
-                f"company={self.company!r})")
+                f"company={self.company!r}), datetime={self.datetime}, address={self.address}")
 
 
 class Product(Base):
     __tablename__ = "products"
     # ID
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)    # Идентификатор
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
     # Information
-    title: Mapped[str] = mapped_column(String(32))    # Название
-    description: Mapped[str] = mapped_column(String(256))    # Описание
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))    # Название компании
-    remained: Mapped[int] = mapped_column(Integer(), default=0)    # Сколько осталось на складе
+    title: Mapped[str] = mapped_column(String(32))  # Название
+    description: Mapped[str] = mapped_column(String(256))  # Описание
+    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
+    remained: Mapped[int] = mapped_column(Integer(), default=0)  # Сколько осталось на складе
     # Image
-    image_url: Mapped[str] = mapped_column(String(128))    # Ссылка на изображение
+    image_url: Mapped[str] = mapped_column(String(128))  # Ссылка на изображение
 
     # Preview
     def __repr__(self) -> str:
@@ -121,17 +121,17 @@ class Product(Base):
 class AuthKey(Base):
     __tablename__ = "authkeys"
     # Information
-    num: Mapped[int] = mapped_column(Integer(), autoincrement=True)    # Идентификатор связи
+    num: Mapped[int] = mapped_column(primary_key=True)  # Идентификатор связи
     ip: Mapped[str] = mapped_column(String())
-    username: Mapped[str] = mapped_column(ForeignKey(User.username))    # Имя пользователя
-    content: Mapped[str] = mapped_column(String(64), primary_key=True)    # Содежимое
-    created: Mapped[str] = mapped_column(Date())    # Дата создания
-    account_type: Mapped[int] = mapped_column(Integer(), default=0)    # Тип аккаунта (пользователь, админ, компания)
+    username: Mapped[str] = mapped_column(ForeignKey(User.username))  # Имя пользователя
+    content: Mapped[str] = mapped_column(String(64))  # Содежимое
+    created: Mapped[str] = mapped_column(Date())  # Дата создания
+    account_type: Mapped[int] = mapped_column(Integer(), default=0)  # Тип аккаунта (пользователь, админ, компания)
 
     # Content generator
-    def __init__(self, username: str, ip: str, account_type: int = 0):
-        self.content = md5(str(self.num).encode()).hexdigest() + md5(str(self.username).encode()).hexdigest()
-        super().__init__(username=username, account_type=account_type, created=date.today().isoformat(), ip=ip)
+    def __init__(self, num: int, username: str, ip: str, account_type: int = 0):
+        self.content = md5(str(num).encode()).hexdigest() + md5(str(username).encode()).hexdigest()
+        super().__init__(num=num, username=username, account_type=account_type, created=date.today().isoformat(), ip=ip)
 
     # Preview
     def __repr__(self) -> str:
