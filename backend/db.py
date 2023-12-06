@@ -1,11 +1,11 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from models import Base, Event
+from models import Base, Event, AuthKey
 
 
 class database:
     def __init__(self, connection: str):
-        self.engine = create_engine(connection, echo=True)
+        self.engine = create_engine(connection)
         self.session = Session(self.engine)
 
     def create_db(self):
@@ -13,11 +13,14 @@ class database:
         Base.metadata.create_all(self.engine)
 
     def get_events(self):
-        result = self.session.execute(select(Event)).fetchall()
-        print(result)
+        result = list(map(lambda x: x[0], self.session.execute(select(Event)).fetchall()))
         for i in range(len(result)):
-            if i is not None:
-                print(i)
-                result[i] = {"title": result[i].title, "description": result[i].description,
-                             "company": result[i].company, "address": result[i].address, "datetime": result[i].datetime}
+            result[i] = {"title": result[i].title, "description": result[i].description,
+                         "company": result[i].company, "address": result[i].address, "datetime": result[i].datetime}
         return result
+
+    def get_auth(self, key):
+        result = self.session.execute(select(AuthKey).where(AuthKey.content == key)).fetchone()
+        if result is None:
+            return None
+        return result[0]
