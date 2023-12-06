@@ -41,11 +41,9 @@ async def verify(auth_key: str | None = Cookie(default=None), username: str | No
     if key.username == username:
         return user
 
-
-@app.get("/events")
+@app.get("/tasks")
 async def events():
-    return db.get_events()
-
+    return db.get_tasks()
 
 @app.get("/register")
 async def register(username: str, password: str, name: str, surname: str, birthday: str, city: str,
