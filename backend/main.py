@@ -24,8 +24,8 @@ async def auth(username: str, password: str, response: Response, request: Reques
             auth_key = AuthKey(username=user.username, ip=request.client.host,
                                num=db.session.execute(Sequence("authkeys_num_seq")))
             print(auth_key)
-            response.set_cookie(key="auth_key", value=auth_key.content)
-            response.set_cookie(key="username", value=f"{username}")
+            response.set_cookie(key="auth_key", value=auth_key.content, max_age=604800)
+            response.set_cookie(key="username", value=f"{username}", max_age=604800)
             db.session.add(auth_key)
             db.session.commit()
             return "Successful"
@@ -35,8 +35,8 @@ async def auth(username: str, password: str, response: Response, request: Reques
         if admin.password_hash == md5(password.encode()).hexdigest():
             auth_key = AuthKey(username=admin.username, ip=request.client.host,
                                num=db.session.execute(Sequence("authkeys_num_seq")))
-            response.set_cookie(key="auth_key", value=auth_key.content)
-            response.set_cookie(key="username", value=f"{username}")
+            response.set_cookie(key="auth_key", value=auth_key.content, max_age=604800)
+            response.set_cookie(key="username", value=f"{username}", max_age=604800)
             db.session.add(auth_key)
             db.session.commit()
             return "Successful"
@@ -68,14 +68,19 @@ async def register(username: str, password: str, name: str, surname: str, birthd
     db.session.add(User(username=username, password_hash=md5(password.encode()).hexdigest(), name=name, surname=surname,
                         patronymic=patronymic,
                         birthday=birthday, city=city))
-    db.session.commit()
     auth_key = AuthKey(username=username, ip=request.client.host, num=db.session.scalar(Sequence("authkeys_num_seq")))
-    response.set_cookie(key="auth_key", value=auth_key.content)
-    response.set_cookie(key="username", value=f"{username}")
+    response.set_cookie(key="auth_key", value=auth_key.content, max_age=604800)
+    response.set_cookie(key="username", value=f"{username}", max_age=604800)
     db.session.add(auth_key)
     db.session.commit()
     return "Successful"
 
+
+@app.get("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="auth_key")
+    response.delete_cookie(key="username")
+    return "Successful"
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
