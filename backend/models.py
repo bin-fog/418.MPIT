@@ -5,6 +5,7 @@ from _md5 import md5
 from datetime import date, datetime
 from typing import Optional
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -26,6 +27,24 @@ class Company(Base):
                 f"logo_url={self.logo_url!r})")
 
 
+class Task(Base):
+    __tablename__ = "tasks"
+    # ID
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
+    # Information
+    title: Mapped[str] = mapped_column(String(32))  # Название
+    description: Mapped[str] = mapped_column(String(256))  # Описание
+    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
+    reward: Mapped[int] = mapped_column(Integer())  # Награда
+    logo_url: Mapped[str] = mapped_column(String(64))  # Ссылка на лого
+    is_completed: Mapped[bool] = mapped_column(Boolean(), default=False)
+
+    # Preview
+    def __repr__(self) -> str:
+        return (f"Event(id={self.id!r}, title={self.title!r}, description={self.description!r}, "
+                f"company={self.company!r})")
+
+
 class User(Base):
     __tablename__ = "users"
     # Login data
@@ -38,6 +57,9 @@ class User(Base):
     patronymic: Mapped[str] = mapped_column(String(24), default="")  # Отчество
     birthday: Mapped[str] = mapped_column(Date(), default="")  # Дата рождения
     city: Mapped[str] = mapped_column(String(20), default="")  # Город
+
+    # Tasks
+    tasks: Mapped[str] = mapped_column(String, default="\t")  # мероприятия
 
     # Reward
     coins: Mapped[int] = mapped_column(Integer(), default=0)  # Монеты
@@ -79,24 +101,6 @@ class Event(Base):
     company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
     address: Mapped[str] = mapped_column(String(64))  # Место проведения
     datetime: Mapped[datetime] = mapped_column(DateTime())  # Дата и время проведения
-
-    # Preview
-    def __repr__(self) -> str:
-        return (f"Event(id={self.id!r}, title={self.title!r}, description={self.description!r}, "
-                f"company={self.company!r}), datetime={self.datetime}, address={self.address}")
-
-
-class Task(Base):
-    __tablename__ = "tasks"
-    # ID
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
-    # Information
-    title: Mapped[str] = mapped_column(String(32))  # Название
-    description: Mapped[str] = mapped_column(String(256))  # Описание
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
-    reward: Mapped[int] = mapped_column(Integer())  # Награда
-    logo_url: Mapped[str] = mapped_column(String(64))  # Ссылка на лого
-    completed: Mapped[bool] = mapped_column(Boolean())
 
     # Preview
     def __repr__(self) -> str:

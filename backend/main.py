@@ -9,10 +9,14 @@ from _md5 import md5
 app = FastAPI()
 db = database(DB_TOKEN)
 
+db.create_db()
 
-# db.create_db()
+
+# TODO: company management
+# TODO: task doing (Main)
 
 
+# Account manager
 @app.get("/auth")
 async def auth(username: str, password: str, response: Response, request: Request):
     user = db.session.get(User, username)
@@ -30,7 +34,7 @@ async def auth(username: str, password: str, response: Response, request: Reques
         return "Invalid password"
 
 
-@app.get("/permissions")
+@app.get("/verify")
 async def verify(auth_key: str | None = Cookie(default=None), username: str | None = Cookie(default=None)):
     if auth_key is None or username is None:
         return "You are not logged in"
@@ -41,9 +45,6 @@ async def verify(auth_key: str | None = Cookie(default=None), username: str | No
     if key.username == username:
         return user
 
-@app.get("/tasks")
-async def events():
-    return db.get_tasks()
 
 @app.get("/register")
 async def register(username: str, password: str, name: str, surname: str, birthday: str, city: str,
@@ -69,6 +70,7 @@ async def logout(response: Response):
     return "Successful"
 
 
+# Profile manager
 @app.get("/profile")
 async def profile(auth_key: str | None = Cookie(default=None),
                   username: str | None = Cookie(default=None)):
@@ -100,6 +102,13 @@ async def change_my_profile(name: str | None = None, surname: str | None = None,
     return "Successful"
 
 
+# User task management
+@app.get("/add-to-tasks")
+async def add_to_tasks(auth_key: str | None = Cookie(default=None), username: str | None = Cookie(default=None)):
+    pass
+
+
+# Money manager
 @app.get("/add-money")
 async def add_money(count: int, recipient_username: str, auth_key: str | None = Cookie(default=None),
                     username: str | None = Cookie(default=None)):
@@ -114,8 +123,15 @@ async def add_money(count: int, recipient_username: str, auth_key: str | None = 
     return "Successful"
 
 
+# Task manager
+@app.get("/tasks")
+async def events():
+    return db.get_tasks()
+
+
 @app.get("/add-task")
-async def add_task(title: str, description: str, reward: str, logo_url: str, auth_key: str | None = Cookie(default=None),
+async def add_task(title: str, description: str, reward: str, logo_url: str,
+                   auth_key: str | None = Cookie(default=None),
                    username: str | None = Cookie(default=None)):
     user = await verify(auth_key, username)
     if type(user) is str:
@@ -125,6 +141,22 @@ async def add_task(title: str, description: str, reward: str, logo_url: str, aut
     company = user.company
     db.session.add(Task(title=title, description=description, reward=reward, logo_url=logo_url, company=company,
                         completed=0))
+    db.session.commit()
+    return "Successful"
+
+
+@app.get("/finish-task")
+async def finish_task(task_id: int, auth_key: str | None = Cookie(default=None),
+                      username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    if user.access_level == 0:
+        return "You don't have rights to manage tasks"
+    task = db.session.get(Task, task_id)
+    if task.company != user.company:
+        return "You can't modify tasks from other companies"
+    task.is_completed = True
     db.session.commit()
     return "Successful"
 
@@ -145,5 +177,6 @@ async def remove_task(task_id: int, auth_key: str | None = Cookie(default=None),
     return "Successful"
 
 
+# Run manager
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

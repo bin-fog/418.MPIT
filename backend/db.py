@@ -23,7 +23,8 @@ class database:
         result = list(map(lambda x: x[0], self.session.execute(select(Task)).fetchall()))
         for i in range(len(result)):
             result[i] = {"id": result[i].id, "title": result[i].title, "description": result[i].description,
-                         "company": result[i].company, "reward": result[i].reward}
+                         "company": result[i].company, "reward": result[i].reward,
+                         "is_completed": result[i].is_completed}
         return result
 
     def get_auth(self, key):
