@@ -1,6 +1,6 @@
 venv
 .idea
-config.pyx
+config.py
 
 /node_modules
 /.pnp
