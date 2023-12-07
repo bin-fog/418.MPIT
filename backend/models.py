@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import String, Integer, Date, DateTime, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from _md5 import md5
-from datetime import date, datetime
+from datetime import date
 from typing import Optional
 
 
@@ -74,38 +74,6 @@ class User(Base):
         return (f"User(username={self.username!r}, name={self.surname + ' ' + self.name + ' ' + self.patronymic!r}, "
                 f"birthday={self.birthday!r}, city={self.city!r}, coins={self.coins!r}, "
                 f"achievements={self.achievements!r})")
-
-
-class Achievement(Base):
-    __tablename__ = "achievements"
-    # ID
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
-    # Information
-    title: Mapped[str] = mapped_column(String(32))  # Название
-    description: Mapped[str] = mapped_column(String(256))  # Описание
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
-
-    # Preview
-    def __repr__(self) -> str:
-        return (f"Achievement(id={self.id!r}, title={self.title!r}, description={self.description!r}, "
-                f"company={self.company!r})")
-
-
-class Event(Base):
-    __tablename__ = "events"
-    # ID
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)  # Идентификатор
-    # Information
-    title: Mapped[str] = mapped_column(String(32))  # Название
-    description: Mapped[str] = mapped_column(String(256))  # Описание
-    company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
-    address: Mapped[str] = mapped_column(String(64))  # Место проведения
-    datetime: Mapped[datetime] = mapped_column(DateTime())  # Дата и время проведения
-
-    # Preview
-    def __repr__(self) -> str:
-        return (f"Event(id={self.id!r}, title={self.title!r}, description={self.description!r}, "
-                f"company={self.company!r}), datetime={self.datetime}, address={self.address}")
 
 
 class Product(Base):

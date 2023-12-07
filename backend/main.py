@@ -110,8 +110,10 @@ async def add_to_tasks(task_id: int, auth_key: str | None = Cookie(default=None)
     user = await verify(auth_key, username)
     if type(user) is str:
         return user
+    print(user.tasks.split("\t"))
     todo, completed = user.tasks.split("\t")
     user.tasks = " ".join(todo.split() + [str(task_id)]) + "\t" + completed
+    db.session.commit()
     return "Successful"
 
 
@@ -120,6 +122,7 @@ async def get_my_tasks(auth_key: str | None = Cookie(default=None), username: st
     user = await verify(auth_key, username)
     if type(user) is str:
         return user
+    print(user.tasks.split("\t"))
     todo, completed = user.tasks.split("\t")
     todo, completed = list(map(int, todo.split())), list(map(int, completed.split()))
     return {"todo": todo, "completed": completed}
@@ -196,26 +199,21 @@ async def remove_task(task_id: int, auth_key: str | None = Cookie(default=None),
 
 # найти пользователей, подписавшихся на задание
 @app.get("/users-on-task")
-async def users_on_task(title: str, description: str, reward: str, logo_url: str,
-                        auth_key: str | None = Cookie(default=None),
+async def users_on_task(task_id: int, auth_key: str | None = Cookie(default=None),
                         username: str | None = Cookie(default=None)):
     user = await verify(auth_key, username)
     if type(user) is str:
         return user
     if user.access_level == 0:
         return "You don't have rights to manage tasks"
-    #
-    # Доделать
-    #
-    #
-
+    print(db.get_users_on_task(task_id))
     return "Successful"
 
 
 # отметить, что посетил
 @app.get("/mark-user")
 async def mark_user(task_id: int, user_name: str, auth_key: str | None = Cookie(default=None),
-                        username: str | None = Cookie(default=None)):
+                    username: str | None = Cookie(default=None)):
     user = await verify(auth_key, username)
     if type(user) is str:
         return user
@@ -223,9 +221,13 @@ async def mark_user(task_id: int, user_name: str, auth_key: str | None = Cookie(
         return "You don't have rights to manage tasks"
     muser = db.session.get(User, user_name)
     todo, completed = muser.tasks.split("\t")
-    todo = " ".join(todo.split().remove(str(task_id)))
+    todo = todo.split()
+    if str(task_id) in todo:
+        todo.remove(str(task_id))
+    todo = " ".join(todo)
     completed += " " + str(task_id)
     muser.tasks = todo + "\t" + completed
+    db.session.commit()
     return "Successful"
 
 

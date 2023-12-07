@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from models import Base, Event, AuthKey, Task
+from models import Base, AuthKey, Task, User
 
 
 class database:
@@ -32,3 +32,6 @@ class database:
         if result is None:
             return None
         return result[0]
+
+    def get_users_on_task(self, task_id: int):
+        print(self.session.execute(select(User.tasks)).fetchall())
