@@ -83,8 +83,9 @@ class Product(Base):
     # Information
     title: Mapped[str] = mapped_column(String(32))  # Название
     description: Mapped[str] = mapped_column(String(256))  # Описание
+    price: Mapped[str] = mapped_column(Integer())  # Стоимость
     company: Mapped[str] = mapped_column(ForeignKey(Company.code_title))  # Название компании
-    remained: Mapped[int] = mapped_column(Integer(), default=0)  # Сколько осталось на складе
+    remained: Mapped[int] = mapped_column(Integer(), default=10)  # Сколько осталось на складе
     # Image
     image_url: Mapped[str] = mapped_column(String(128))  # Ссылка на изображение
 

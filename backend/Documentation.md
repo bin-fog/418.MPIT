@@ -78,3 +78,15 @@
 
     INPUT: task_id: int
     OUTPUT: Successful
+
+## /add-product
+Добавляет товар
+
+    INPUT: title: str, description: str, price: int, remained: int, image_url: int,
+    OUTPUT: Sucessful
+
+## /remove-product
+Удаляет товар
+
+    INPUT: product_id: int
+    OUTPUT: Successful

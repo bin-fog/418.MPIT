@@ -1,6 +1,6 @@
 import uvicorn
 from db import database
-from models import User, AuthKey, Task
+from models import User, AuthKey, Task, Product
 from fastapi import FastAPI, Response, Cookie, Request
 from config import DB_TOKEN
 from sqlalchemy import Sequence
@@ -227,6 +227,43 @@ async def mark_user(task_id: int, user_name: str, auth_key: str | None = Cookie(
     todo = " ".join(todo)
     completed += " " + str(task_id)
     muser.tasks = todo + "\t" + completed
+    db.session.commit()
+    return "Successful"
+
+
+# Products
+@app.get("/products")
+async def products():
+    return db.get_products()
+
+
+@app.get("/add-product")
+async def add_product(title: str, description: str, price: int, remained: int, image_url: int,
+                      auth_key: str | None = Cookie(default=None), username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    if user.access_level == 0:
+        return "You don't have rights to manage products"
+    company = user.company
+    db.session.add(Product(title=title, description=description, company=company,
+                           price=price, remained=remained, image_url=image_url))
+    db.session.commit()
+    return "Successful"
+
+
+@app.get("/remove-product")
+async def remove_product(product_id: int, auth_key: str | None = Cookie(default=None),
+                         username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    if user.access_level == 0:
+        return "You don't have rights to manage products"
+    product = db.session.get(Product, product_id)
+    if product.company != user.company:
+        return "You can't modify tasks from other companies"
+    db.session.delete(product)
     db.session.commit()
     return "Successful"
 

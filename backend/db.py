@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-from models import Base, AuthKey, Task, User
+from models import Base, AuthKey, Task, User, Product
 
 
 class database:
@@ -25,6 +25,14 @@ class database:
             result[i] = {"id": result[i].id, "title": result[i].title, "description": result[i].description,
                          "company": result[i].company, "reward": result[i].reward,
                          "is_completed": result[i].is_completed}
+        return result
+
+    def get_products(self):
+        result = list(map(lambda x: x[0], self.session.execute(select(Product)).fetchall()))
+        for i in range(len(result)):
+            result[i] = {"id": result[i].id, "title": result[i].title, "description": result[i].description,
+                         "company": result[i].company, "price": result[i].price, "remained": result[i].remained,
+                         "image_url": result[i].image_url}
         return result
 
     def get_auth(self, key):
