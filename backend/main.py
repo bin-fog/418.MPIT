@@ -5,10 +5,18 @@ from fastapi import FastAPI, Response, Cookie, Request
 from config import DB_TOKEN
 from sqlalchemy import Sequence
 from _md5 import md5
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 db = database(DB_TOKEN)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # db.create_db()
 
