@@ -9,7 +9,8 @@ from _md5 import md5
 app = FastAPI()
 db = database(DB_TOKEN)
 
-db.create_db()
+
+# db.create_db()
 
 
 # TODO: company management
@@ -104,8 +105,24 @@ async def change_my_profile(name: str | None = None, surname: str | None = None,
 
 # User task management
 @app.get("/add-to-tasks")
-async def add_to_tasks(auth_key: str | None = Cookie(default=None), username: str | None = Cookie(default=None)):
-    pass
+async def add_to_tasks(task_id: int, auth_key: str | None = Cookie(default=None),
+                       username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    todo, completed = user.tasks.split("\t")
+    user.tasks = " ".join(todo.split() + [str(task_id)]) + "\t" + completed
+    return "Successful"
+
+
+@app.get("/get-my-tasks")
+async def get_my_tasks(auth_key: str | None = Cookie(default=None), username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    todo, completed = user.tasks.split("\t")
+    todo, completed = list(map(int, todo.split())), list(map(int, completed.split()))
+    return {"todo": todo, "completed": completed}
 
 
 # Money manager
@@ -174,6 +191,41 @@ async def remove_task(task_id: int, auth_key: str | None = Cookie(default=None),
         return "You can't modify tasks from other companies"
     db.session.delete(task)
     db.session.commit()
+    return "Successful"
+
+
+# найти пользователей, подписавшихся на задание
+@app.get("/users-on-task")
+async def users_on_task(title: str, description: str, reward: str, logo_url: str,
+                        auth_key: str | None = Cookie(default=None),
+                        username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    if user.access_level == 0:
+        return "You don't have rights to manage tasks"
+    #
+    # Доделать
+    #
+    #
+
+    return "Successful"
+
+
+# отметить, что посетил
+@app.get("/mark-user")
+async def mark_user(task_id: int, user_name: str, auth_key: str | None = Cookie(default=None),
+                        username: str | None = Cookie(default=None)):
+    user = await verify(auth_key, username)
+    if type(user) is str:
+        return user
+    if user.access_level == 0:
+        return "You don't have rights to manage tasks"
+    muser = db.session.get(User, user_name)
+    todo, completed = muser.tasks.split("\t")
+    todo = " ".join(todo.split().remove(str(task_id)))
+    completed += " " + str(task_id)
+    muser.tasks = todo + "\t" + completed
     return "Successful"
 
 
